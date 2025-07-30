@@ -1,0 +1,20 @@
+[
+  {
+    "title": "Potato and Sausage Skillet",
+    "tags": ["potato", "sausage", "onion"],
+    "image": "https://via.placeholder.com/150",
+    "ingredients": [
+      "200g potatoes",
+      "3 sausages",
+      "1 onion",
+      "salt and pepper"
+    ],
+    "steps": [
+      "Peel and dice the potatoes.",
+      "Slice the sausages and onion.",
+      "Heat a pan with a little oil, add the potatoes and fry for 5 minutes.",
+      "Add the sausages and onion, fry for another 7 minutes.",
+      "Season with salt and pepper to taste and serve."
+    ]
+  }
+]
