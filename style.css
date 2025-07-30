@@ -8,13 +8,18 @@
 /* 2. Osnovni reset i font */
 * {
   box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
+
 body {
   margin: 0;
   font-family: 'Montserrat', sans-serif;
   color: var(--text-main);
-  background: url('https://source.unsplash.com/1600x900/?kitchen') no-repeat center/cover;
-  background-attachment: fixed;
+
+  /* lokalna pozadina */
+  background: url('kitchen.jpg') no-repeat center center fixed;
+  background-size: cover;
 }
 
 /* 3. Kontejner i header */
@@ -34,15 +39,7 @@ body {
 .app-title {
   font-size: 3rem;
   font-weight: 700;
-  position: relative;
-  display: inline-block;
   color: var(--primary);
-}
-.app-title .chef-hat {
-  width: 50px;
-  position: absolute;
-  top: -15px;
-  right: -60px;
 }
 
 /* 4. Input i dugmad */
@@ -63,7 +60,7 @@ body {
   transition: border-color 0.2s;
 }
 .ingredient-input:focus {
-  border-color: darken(var(--primary),10%);
+  border-color: #e65a51; /* tamnija nijansa primary */
 }
 .btn {
   background: var(--primary);
@@ -105,4 +102,34 @@ body {
 }
 .recipe-content {
   padding: 1rem 1.2rem;
+}
+
+/* Share dugmad */
+.share-btn {
+  align-self: start;
+  margin-top: auto;
+  background: var(--primary);
+  color: white;
+  padding: 10px 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+.share-options {
+  display: none;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 10px;
+  border-radius: 6px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+.share-options.visible {
+  display: flex;
+}
+.social-icon {
+  font-size: 1.4rem;
+  color: var(--primary);
+  text-decoration: none;
 }
