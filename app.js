@@ -1,104 +1,125 @@
-let ingredients = [];
-let allRecipes = [];
+document.addEventListener("DOMContentLoaded", function() {
+  var pantry = [];
+  var allRecipes = [];
 
-fetch('recipes.json')
-  .then(r => r.json())
-  .then(data => { allRecipes = data; })
-  .catch(console.error);
+  // DOM elementi
+  var input = document.getElementById("ingredient-input");
+  var getBtn = document.getElementById("get-recipe-btn");
+  var clearBtn = document.getElementById("clear-btn");
+  var tagsDiv = document.getElementById("tags");
+  var resultsDiv = document.getElementById("results");
 
-const input = document.getElementById('ingredient-input');
-const getBtn = document.getElementById('get-recipe-btn');
-const clearBtn = document.getElementById('clear-btn');
-const tagsDiv = document.getElementById('tags');
-const resultsDiv = document.getElementById('results');
+  // Učitaj recepte
+  fetch("recipes.json")
+    .then(function(res) { return res.json(); })
+    .then(function(data) { allRecipes = data; })
+    .catch(function(err) { console.error("Failed to load recipes:", err); });
 
-// Dodaj tag na Enter
-input.addEventListener('keydown', e => {
-  if (e.key === 'Enter' && input.value.trim()) {
-    e.preventDefault();
-    const tag = input.value.trim().toLowerCase();
-    if (ingredients.length < 5 && !ingredients.includes(tag)) {
-      ingredients.push(tag);
-      renderTags();
+  // Parsiranje unosa: "0.5 tomato" ili fallback
+  function parseEntry(text) {
+    var parts = text.trim().split(/\s+/);
+    var amount = parseFloat(parts[0]);
+    var unit, name;
+    if (!isNaN(amount) && parts.length > 1) {
+      unit = parts[1];
+      name = parts.slice(2).join(" ");
+    } else {
+      amount = 1;
+      unit = "piece";
+      name = text.trim();
     }
-    input.value = '';
-  }
-});
-
-// Filtriraj recepte na klik
-getBtn.addEventListener('click', () => {
-  resultsDiv.innerHTML = '';
-
-  if (ingredients.length < 2) {
-    resultsDiv.innerHTML = '<p class="no-recipes">Please add at least two ingredients to get recipes.</p>';
-    return;
+    return {
+      name: name.toLowerCase(),
+      amount: amount,
+      unit: unit.toLowerCase()
+    };
   }
 
-  const matches = allRecipes.filter(r =>
-    // tražimo recepte koji sadrže sve unete sastojke
-    ingredients.every(i => r.tags.includes(i))
-  );
-
-  if (!matches.length) {
-    resultsDiv.innerHTML = '<p class="no-recipes">No recipes found for these ingredients.</p>';
-    return;
+  // Iscrtavanje tagova
+  function renderTags() {
+    tagsDiv.innerHTML = "";
+    pantry.forEach(function(item, idx) {
+      var tag = document.createElement("div");
+      tag.className = "tag";
+      tag.textContent = item.amount + " " + item.unit + " " + item.name;
+      var span = document.createElement("span");
+      span.textContent = "×";
+      span.addEventListener("click", function() {
+        pantry.splice(idx, 1);
+        renderTags();
+      });
+      tag.appendChild(span);
+      tagsDiv.appendChild(tag);
+    });
   }
 
-  matches.slice(0, 5).forEach(r => {
-    const card = document.createElement('div');
-    card.className = 'recipe';
-    card.innerHTML = `
-      <img src="${r.image}" alt="${r.title}">
-      <div class="recipe-content">
-        <h3>${r.title}</h3>
-        <p><strong>Ingredients:</strong></p>
-        <ul>${r.ingredients.map(i => `<li>${i}</li>`).join('')}</ul>
-        <p><strong>Steps:</strong></p>
-        <ol>${r.steps.map(s => `<li>${s}</li>`).join('')}</ol>
-        <button class="share-btn">Share Recipe</button>
-        <div class="share-options">
-          <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
-          <a href="#" class="social-icon"><i class="fab fa-x-twitter"></i></a>
-          <a href="#" class="social-icon"><i class="fab fa-facebook"></i></a>
-          <a href="#" class="social-icon"><i class="fab fa-tiktok"></i></a>
-          <a href="#" class="social-icon"><i class="fab fa-viber"></i></a>
-          <a href="#" class="social-icon"><i class="fab fa-telegram"></i></a>
-          <a href="#" class="social-icon"><i class="fab fa-whatsapp"></i></a>
-          <a href="#" class="social-icon"><i class="fab fa-reddit"></i></a>
-        </div>
-      </div>
-    `;
-    resultsDiv.append(card);
+  // Provera da li recept može da se napravi
+  function canMake(recipe) {
+    return recipe.ingredients.every(function(req) {
+      var have = pantry.find(function(p) {
+        return p.name === req.name && p.unit === req.unit && p.amount >= req.amount;
+      });
+      return Boolean(have);
+    });
+  }
 
-    const shareBtn = card.querySelector('.share-btn');
-    const shareBox = card.querySelector('.share-options');
-    shareBtn.addEventListener('click', () => {
-      shareBox.classList.toggle('visible');
+  // Dodaj u pantry na Enter
+  input.addEventListener("keydown", function(e) {
+    if (e.key === "Enter" && input.value.trim() !== "") {
+      e.preventDefault();
+      var item = parseEntry(input.value);
+      var dup = pantry.some(function(p) {
+        return p.name === item.name && p.unit === item.unit;
+      });
+      if (pantry.length < 10 && !dup) {
+        pantry.push(item);
+        renderTags();
+      }
+      input.value = "";
+    }
+  });
+
+  // Prikaži recepte
+  getBtn.addEventListener("click", function() {
+    resultsDiv.innerHTML = "";
+    if (pantry.length < 2) {
+      resultsDiv.innerHTML = "<p class='no-recipes'>Please add at least two ingredients with amounts.</p>";
+      return;
+    }
+    var matches = allRecipes.filter(canMake);
+    if (matches.length === 0) {
+      resultsDiv.innerHTML = "<p class='no-recipes'>No recipes found for these ingredients.</p>";
+      return;
+    }
+    matches.forEach(function(recipe) {
+      var card = document.createElement("div");
+      card.className = "recipe";
+      var html = "";
+      html += "<img src=\"" + recipe.image + "\" alt=\"" + recipe.title + "\">";
+      html += "<div class=\"recipe-content\">";
+      html += "<h3>" + recipe.title + "</h3>";
+      html += "<p><strong>Ingredients:</strong></p>";
+      html += "<ul>";
+      recipe.ingredients.forEach(function(i) {
+        html += "<li>" + i.amount + " " + i.unit + " " + i.name + "</li>";
+      });
+      html += "</ul>";
+      html += "<p><strong>Steps:</strong></p>";
+      html += "<ol>";
+      recipe.steps.forEach(function(s) {
+        html += "<li>" + s + "</li>";
+      });
+      html += "</ol>";
+      html += "</div>";
+      card.innerHTML = html;
+      resultsDiv.appendChild(card);
     });
   });
-});
 
-// Očisti sve tagove
-clearBtn.addEventListener('click', () => {
-  ingredients = [];
-  renderTags();
-  resultsDiv.innerHTML = '';
-});
-
-// Render tagova ispod input polja
-function renderTags() {
-  tagsDiv.innerHTML = '';
-  ingredients.forEach((tag, i) => {
-    const div = document.createElement('div');
-    div.className = 'tag';
-    div.textContent = tag;
-    const span = document.createElement('span');
-    span.textContent = '×';
-    span.onclick = () => {
-      ingredients.splice(i, 1);
-      renderTags();
-    };
-    div.append(span);
-    tagsDiv.append(div);
+  // Clear all
+  clearBtn.addEventListener("click", function() {
+    pantry = [];
+    renderTags();
+    resultsDiv.innerHTML = "";
   });
-}
+});

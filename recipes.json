@@ -1,20 +1,33 @@
 [
   {
-    "title": "Potato and Sausage Skillet",
-    "tags": ["potato", "sausage", "onion"],
-    "image": "https://via.placeholder.com/150",
+    "title": "Tomato Egg Scramble",
     "ingredients": [
-      "200g potatoes",
-      "3 sausages",
-      "1 onion",
-      "salt and pepper"
+      { "name": "egg", "amount": 2, "unit": "piece" },
+      { "name": "tomato", "amount": 1, "unit": "piece" },
+      { "name": "salt", "amount": 1, "unit": "pinch" },
+      { "name": "pepper", "amount": 1, "unit": "pinch" }
     ],
     "steps": [
-      "Peel and dice the potatoes.",
-      "Slice the sausages and onion.",
-      "Heat a pan with a little oil, add the potatoes and fry for 5 minutes.",
-      "Add the sausages and onion, fry for another 7 minutes.",
-      "Season with salt and pepper to taste and serve."
+      "Dice the tomato.",
+      "Beat the eggs in a bowl, season with salt and pepper.",
+      "Heat a little oil in a pan over medium heat.",
+      "Add the tomato and sauté for 2 minutes.",
+      "Pour in the eggs and scramble until fully cooked.",
+      "Serve immediately."
+    ]
+  },
+  {
+    "title": "Salami Toast",
+    "ingredients": [
+      { "name": "bread slice", "amount": 2, "unit": "piece" },
+      { "name": "salami", "amount": 120, "unit": "g" },
+      { "name": "butter", "amount": 10, "unit": "g" }
+    ],
+    "steps": [
+      "Spread butter on each bread slice.",
+      "Top with salami slices.",
+      "Toast in a skillet until golden.",
+      "Serve hot."
     ]
   }
 ]
