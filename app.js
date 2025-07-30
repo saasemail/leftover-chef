@@ -12,9 +12,11 @@ const clearBtn = document.getElementById('clear-btn');
 const tagsDiv = document.getElementById('tags');
 const resultsDiv = document.getElementById('results');
 
+// Dodaj tag na Enter
 input.addEventListener('keydown', e => {
   if (e.key === 'Enter' && input.value.trim()) {
-    let tag = input.value.trim().toLowerCase();
+    e.preventDefault();
+    const tag = input.value.trim().toLowerCase();
     if (ingredients.length < 5 && !ingredients.includes(tag)) {
       ingredients.push(tag);
       renderTags();
@@ -23,19 +25,25 @@ input.addEventListener('keydown', e => {
   }
 });
 
+// Filtriraj recepte na klik
 getBtn.addEventListener('click', () => {
   resultsDiv.innerHTML = '';
-  if (!ingredients.length) {
-    resultsDiv.innerHTML = '<p class="no-recipes">Please add at least one ingredient.</p>';
+
+  if (ingredients.length < 2) {
+    resultsDiv.innerHTML = '<p class="no-recipes">Please add at least two ingredients to get recipes.</p>';
     return;
   }
+
   const matches = allRecipes.filter(r =>
+    // tražimo recepte koji sadrže sve unete sastojke
     ingredients.every(i => r.tags.includes(i))
   );
+
   if (!matches.length) {
     resultsDiv.innerHTML = '<p class="no-recipes">No recipes found for these ingredients.</p>';
     return;
   }
+
   matches.slice(0, 5).forEach(r => {
     const card = document.createElement('div');
     card.className = 'recipe';
@@ -70,12 +78,14 @@ getBtn.addEventListener('click', () => {
   });
 });
 
+// Očisti sve tagove
 clearBtn.addEventListener('click', () => {
   ingredients = [];
   renderTags();
   resultsDiv.innerHTML = '';
 });
 
+// Render tagova ispod input polja
 function renderTags() {
   tagsDiv.innerHTML = '';
   ingredients.forEach((tag, i) => {
