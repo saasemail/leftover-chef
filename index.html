@@ -1,31 +1,46 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Leftover Chef</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="container">
-    <header class="header">
-      <h1 class="app-title">Leftover Chef</h1>
-      <p class="tagline">Got leftovers? Don’t waste them. Leftover Chef finds recipes using your exact amounts.</p>
+    <header>
+      <h1>Leftover Chef</h1>
+      <p>Get recipe suggestions for your leftovers.</p>
     </header>
 
     <div class="input-area">
-      <input
-        id="ingredient-input"
-        class="ingredient-input"
-        type="text"
-        placeholder="Type like ‘0.5 tomato’, ‘3 egg’, then press Enter"
-      />
-      <button id="get-recipe-btn" class="btn">Get Recipes</button>
-      <button id="clear-btn" class="btn btn-secondary">Clear All</button>
+      <div class="field">
+        <label for="ingredient-name">Ingredient</label>
+        <input type="text" id="ingredient-name" placeholder="e.g. tomato">
+      </div>
+      <div class="field">
+        <label for="ingredient-amount">Amount</label>
+        <input type="number" id="ingredient-amount" min="0" step="0.1" placeholder="e.g. 0.5">
+      </div>
+      <div class="field">
+        <label for="ingredient-unit">Unit</label>
+        <select id="ingredient-unit">
+          <option value="g">grams</option>
+          <option value="kg">kilograms</option>
+          <option value="ml">milliliters</option>
+          <option value="l">liters</option>
+          <option value="piece">piece(s)</option>
+        </select>
+      </div>
+      <button id="add-ingredient-btn" class="btn">Add</button>
     </div>
 
     <div id="tags" class="tags"></div>
+
+    <button id="get-recipes-btn" class="btn primary">Get Recipes</button>
+    <button id="clear-btn" class="btn secondary">Clear All</button>
+
     <div id="results" class="results"></div>
   </div>
 
