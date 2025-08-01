@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Leftover Chef</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="container">
-    <header>
-      <h1>Leftover Chef</h1>
-      <p>Get recipe suggestions for your leftovers.</p>
+    <header class="header">
+      <h1 class="app-title">Leftover Chef</h1>
+      <p class="tagline">Enter your leftovers and get instant recipe suggestions.</p>
     </header>
 
     <div class="input-area">
@@ -26,14 +26,14 @@
       <div class="field">
         <label for="ingredient-unit">Unit</label>
         <select id="ingredient-unit">
+          <option value="piece">piece(s)</option>
           <option value="g">grams</option>
           <option value="kg">kilograms</option>
           <option value="ml">milliliters</option>
           <option value="l">liters</option>
-          <option value="piece">piece(s)</option>
         </select>
       </div>
-      <button id="add-ingredient-btn" class="btn">Add</button>
+      <button id="add-ingredient-btn" class="btn">Add Ingredient</button>
     </div>
 
     <div id="tags" class="tags"></div>

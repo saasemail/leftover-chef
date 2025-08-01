@@ -2,32 +2,29 @@
   {
     "title": "Tomato Egg Scramble",
     "ingredients": [
-      { "name": "egg", "amount": 2, "unit": "piece" },
-      { "name": "tomato", "amount": 1, "unit": "piece" },
-      { "name": "salt", "amount": 1, "unit": "pinch" },
-      { "name": "pepper", "amount": 1, "unit": "pinch" }
+      { "name": "egg", "amount": 1, "unit": "piece" },
+      { "name": "tomato", "amount": 0.5, "unit": "piece" }
     ],
     "steps": [
-      "Dice the tomato.",
-      "Beat the eggs in a bowl, season with salt and pepper.",
-      "Heat a little oil in a pan over medium heat.",
-      "Add the tomato and sauté for 2 minutes.",
-      "Pour in the eggs and scramble until fully cooked.",
-      "Serve immediately."
+      "Beat the egg and finely chop the tomato.",
+      "Heat oil in a pan over medium heat.",
+      "Add tomato and sauté for 2 minutes.",
+      "Pour in the egg mixture and scramble until cooked.",
+      "Season with salt and pepper to taste."
     ]
   },
   {
-    "title": "Salami Toast",
+    "title": "Ham & Egg Omelette",
     "ingredients": [
-      { "name": "bread slice", "amount": 2, "unit": "piece" },
-      { "name": "salami", "amount": 120, "unit": "g" },
-      { "name": "butter", "amount": 10, "unit": "g" }
+      { "name": "egg", "amount": 2, "unit": "piece" },
+      { "name": "ham", "amount": 50, "unit": "g" }
     ],
     "steps": [
-      "Spread butter on each bread slice.",
-      "Top with salami slices.",
-      "Toast in a skillet until golden.",
-      "Serve hot."
+      "Beat eggs and season with salt and pepper.",
+      "Heat butter in a pan.",
+      "Add eggs, cook until they start to set.",
+      "Sprinkle diced ham on one half, fold omelette.",
+      "Slide onto plate and serve."
     ]
   }
 ]
