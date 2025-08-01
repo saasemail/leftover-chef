@@ -1,34 +1,75 @@
-// Local rule-based recipe finder
+// app.js
 document.addEventListener('DOMContentLoaded', function() {
-  var pantry = [];
-  var allRecipes = [];
+  // --- Konverzija jedinica ---
+  const UNIT_CONVERSIONS = {
+    g:     { toBase: amt => amt,          unit: 'g'   },
+    kg:    { toBase: amt => amt * 1000,   unit: 'g'   },
+    ml:    { toBase: amt => amt,          unit: 'ml'  },
+    l:     { toBase: amt => amt * 1000,   unit: 'ml'  },
+    piece: { toBase: amt => amt,          unit: 'piece' }
+  };
+
+  function normalizePantry(pantry) {
+    return pantry.map(({ name, amount, unit }) => {
+      const conv = UNIT_CONVERSIONS[unit];
+      return {
+        name,
+        amount: conv.toBase(amount),
+        unit: conv.unit
+      };
+    });
+  }
+
+  // --- One-Pot fallback ---
+  function makeOnePotRecipe(pantry) {
+    // suma svih količina (u baznim jedinicama)
+    const total = pantry.reduce((sum, p) => sum + p.amount, 0);
+    const waterAmt = total * 2; // duplo više tečnosti
+    const saltAmt  = Math.ceil(total / 100) * 2;   // ~2g soli na 100g
+    const pepperAmt= Math.ceil(total / 200) * 1;   // ~1g bibera na 200g
+
+    return {
+      title: 'Universal One-Pot Leftovers',
+      ingredients: [
+        ...pantry.map(p => ({ name: p.name, amount: p.amount, unit: p.unit })),
+        { name: 'water or stock', amount: waterAmt,    unit: 'ml'    },
+        { name: 'salt',           amount: saltAmt,     unit: 'g'     },
+        { name: 'pepper',         amount: pepperAmt,   unit: 'g'     }
+      ],
+      steps: [
+        'Combine all your leftover ingredients in a pot.',
+        `Pour in about ${waterAmt}ml of water or stock (roughly twice the volume).`,
+        'Bring to a boil, then reduce heat and simmer 10–15 minutes.',
+        'Season with salt and pepper to taste.',
+        'Stir in fresh herbs if available, then serve hot.'
+      ]
+    };
+  }
+
+  // --- Glavni kod ---
+  let pantry = [];
+  let allRecipes = [];  // ne koristimo za MVP
 
   // Elements
-  var nameInput    = document.getElementById('ingredient-name');
-  var amountInput  = document.getElementById('ingredient-amount');
-  var unitSelect   = document.getElementById('ingredient-unit');
-  var addBtn       = document.getElementById('add-ingredient-btn');
-  var getBtn       = document.getElementById('get-recipes-btn');
-  var clearBtn     = document.getElementById('clear-btn');
-  var tagsDiv      = document.getElementById('tags');
-  var resultsDiv   = document.getElementById('results');
+  const nameInput   = document.getElementById('ingredient-name');
+  const amountInput = document.getElementById('ingredient-amount');
+  const unitSelect  = document.getElementById('ingredient-unit');
+  const addBtn      = document.getElementById('add-ingredient-btn');
+  const getBtn      = document.getElementById('get-recipes-btn');
+  const clearBtn    = document.getElementById('clear-btn');
+  const tagsDiv     = document.getElementById('tags');
+  const resultsDiv  = document.getElementById('results');
 
-  // Load local recipes.json
-  fetch('recipes.json')
-    .then(function(res) { return res.json(); })
-    .then(function(data) { allRecipes = data; })
-    .catch(function(err) { console.error(err); });
-
-  // Render tags
+  // Render tagove
   function renderTags() {
     tagsDiv.innerHTML = '';
-    pantry.forEach(function(item, i) {
-      var div = document.createElement('div');
+    pantry.forEach((item, i) => {
+      const div = document.createElement('div');
       div.className = 'tag';
-      div.textContent = item.amount + ' ' + item.unit + ' ' + item.name;
-      var span = document.createElement('span');
+      div.textContent = `${item.amount} ${item.unit} ${item.name}`;
+      const span = document.createElement('span');
       span.textContent = '×';
-      span.addEventListener('click', function() {
+      span.addEventListener('click', () => {
         pantry.splice(i, 1);
         renderTags();
       });
@@ -37,143 +78,56 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // Add ingredient
-  addBtn.addEventListener('click', function() {
-    var n   = nameInput.value.trim().toLowerCase();
-    var amt = parseFloat(amountInput.value);
-    var u   = unitSelect.value;
-    if (!n || isNaN(amt) || amt <= 0) return;
-    var exists = pantry.some(function(p) { return p.name === n && p.unit === u; });
-    if (!exists) {
-      pantry.push({ name: n, amount: amt, unit: u });
-      renderTags();
-      nameInput.value = '';
-      amountInput.value = '';
-    }
+  // Dodaj sastojak
+  addBtn.addEventListener('click', () => {
+    const name  = nameInput.value.trim().toLowerCase();
+    const amt   = parseFloat(amountInput.value);
+    const unit  = unitSelect.value;
+    if (!name || isNaN(amt) || amt <= 0) return;
+    pantry.push({ name, amount: amt, unit });
+    nameInput.value = '';
+    amountInput.value = '';
+    renderTags();
   });
 
-  // Find exact matches
-  getBtn.addEventListener('click', function() {
+  // Get Recipes
+  getBtn.addEventListener('click', () => {
     resultsDiv.innerHTML = '';
     if (pantry.length === 0) {
       resultsDiv.innerHTML = '<p class="no-recipes">Add at least one ingredient.</p>';
       return;
     }
 
-    var exact = [];
-    for (var i = 0; i < allRecipes.length; i++) {
-      var recipe = allRecipes[i];
-      var ok = true;
-      for (var j = 0; j < recipe.ingredients.length; j++) {
-        var req = recipe.ingredients[j];
-        var found = false;
-        for (var k = 0; k < pantry.length; k++) {
-          var p = pantry[k];
-          if (p.name === req.name && p.unit === req.unit && p.amount >= req.amount) {
-            found = true;
-            break;
-          }
-        }
-        if (!found) { ok = false; break; }
-      }
-      if (ok) exact.push(recipe);
-    }
+    // Normalize
+    const normPantry = normalizePantry(pantry);
 
-    if (exact.length > 0) {
-      displayRecipes(exact);
-    } else {
-      var fallback = generateRuleBasedRecipe(pantry);
-      if (fallback) {
-        displayGenerated(fallback);
-      } else {
-        resultsDiv.innerHTML = '<p class="no-recipes">No matching recipes found.</p>';
-      }
-    }
+    // Fallback One-Pot
+    const recipe = makeOnePotRecipe(normPantry);
+    displayGenerated(recipe);
   });
 
-  // Clear all
-  clearBtn.addEventListener('click', function() {
+  // Clear All
+  clearBtn.addEventListener('click', () => {
     pantry = [];
     renderTags();
     resultsDiv.innerHTML = '';
   });
 
-  // Display recipes
-  function displayRecipes(arr) {
-    resultsDiv.innerHTML = '';
-    for (var i = 0; i < arr.length; i++) {
-      var r = arr[i];
-      var card = document.createElement('div');
-      card.className = 'recipe';
-      var html = '<h3>' + r.title + '</h3><ul>';
-      for (var j = 0; j < r.ingredients.length; j++) {
-        var ing = r.ingredients[j];
-        html += '<li>' + ing.amount + ' ' + ing.unit + ' ' + ing.name + '</li>';
-      }
-      html += '</ul><p><strong>Steps:</strong></p><ol>';
-      for (var k = 0; k < r.steps.length; k++) {
-        html += '<li>' + r.steps[k] + '</li>';
-      }
-      html += '</ol>';
-      card.innerHTML = html;
-      resultsDiv.appendChild(card);
-    }
-  }
-
-  // Display generated recipe
+  // Prikaz generisanog recepta
   function displayGenerated(rec) {
     resultsDiv.innerHTML = '';
-    var card = document.createElement('div');
+    const card = document.createElement('div');
     card.className = 'recipe';
-    var html = '<h3>' + rec.title + '</h3><ul>';
-    for (var i = 0; i < rec.ingredients.length; i++) {
-      var ing = rec.ingredients[i];
-      html += '<li>' + ing.amount + ' ' + ing.unit + ' ' + ing.name + '</li>';
-    }
-    html += '</ul><p><strong>Steps:</strong></p><ol>';
-    for (var j = 0; j < rec.steps.length; j++) {
-      html += '<li>' + rec.steps[j] + '</li>';
-    }
-    html += '</ol>';
+    let html = `<h3>${rec.title}</h3><ul>`;
+    rec.ingredients.forEach(ing => {
+      html += `<li>${ing.amount} ${ing.unit} ${ing.name}</li>`;
+    });
+    html += `</ul><p><strong>Steps:</strong></p><ol>`;
+    rec.steps.forEach(step => {
+      html += `<li>${step}</li>`;
+    });
+    html += `</ol>`;
     card.innerHTML = html;
     resultsDiv.appendChild(card);
   }
-
-  // Simple rule-based fallback
-  function generateRuleBasedRecipe(pantry) {
-    var names = [];
-    for (var i = 0; i < pantry.length; i++) {
-      names.push(pantry[i].name);
-    }
-    if (names.indexOf('egg') !== -1 && names.indexOf('tomato') !== -1) {
-      return {
-        title: 'Tomato Egg Scramble (Rule-Based)',
-        ingredients: [
-          { name: 'egg', amount: 1, unit: 'piece' },
-          { name: 'tomato', amount: 0.5, unit: 'piece' }
-        ],
-        steps: [
-          'Beat the egg and chop the tomato.',
-          'Heat oil, add tomato and sauté.',
-          'Add egg and scramble until cooked.',
-          'Season and serve.'
-        ]
-      };
-    }
-    if (names.indexOf('egg') !== -1 && names.indexOf('ham') !== -1) {
-      return {
-        title: 'Ham & Egg Omelette (Rule-Based)',
-        ingredients: [
-          { name: 'egg', amount: 2, unit: 'piece' },
-          { name: 'ham', amount: 50, unit: 'g' }
-        ],
-        steps: [
-          'Beat eggs, season.',
-          'Heat butter and pour eggs.',
-          'Add ham, fold, and serve.'
-        ]
-      };
-    }
-    return null;
-  }
-});  // <-- This is the final closing parenthesis and semicolon; make sure it's present and aligned.
+});
