@@ -1,72 +1,79 @@
 // app.js
-document.addEventListener('DOMContentLoaded', function() {
-  // --- Konverzija jedinica ---
+document.addEventListener('DOMContentLoaded', () => {
+  // Karte za prepoznavanje jedinica po nazivu
+  const UNIT_MAP = [
+    { pattern: /\b(egg|eggs)\b/,     unit: 'piece', step: 1,   ph: 'e.g. 1'   },
+    { pattern: /\b(milk|water|broth)\b/, unit: 'ml',   step: 50,  ph: 'e.g. 250' },
+    { pattern: /\b(ham|chicken|beef|meat)\b/, unit: 'g',   step: 10,  ph: 'e.g. 100' },
+    { pattern: /\b(tomato|cucumber|onion|pepper|carrot)\b/, unit: 'g', step: 10,  ph: 'e.g. 50'  },
+    // dodaj po potrebi: fish, rice, beans...
+  ];
+  const DEFAULT_UNIT = { unit: 'g', step: 10, ph: 'e.g. 100' };
+
+  function inferUnit(name) {
+    name = name.toLowerCase();
+    for (const m of UNIT_MAP) {
+      if (m.pattern.test(name)) return { unit: m.unit, step: m.step, ph: m.ph };
+    }
+    return DEFAULT_UNIT;
+  }
+
+  // Konvertor za bazne jedinice
   const UNIT_CONVERSIONS = {
-    g:     { toBase: amt => amt,          unit: 'g'   },
-    kg:    { toBase: amt => amt * 1000,   unit: 'g'   },
-    ml:    { toBase: amt => amt,          unit: 'ml'  },
-    l:     { toBase: amt => amt * 1000,   unit: 'ml'  },
-    piece: { toBase: amt => amt,          unit: 'piece' }
+    g:     { toBase: x => x,          unit: 'g'   },
+    ml:    { toBase: x => x,          unit: 'ml'  },
+    piece: { toBase: x => x,          unit: 'piece' }
   };
 
   function normalizePantry(pantry) {
     return pantry.map(({ name, amount, unit }) => {
-      const conv = UNIT_CONVERSIONS[unit];
-      return {
-        name,
-        amount: conv.toBase(amount),
-        unit: conv.unit
-      };
+      const conv = UNIT_CONVERSIONS[unit] || UNIT_CONVERSIONS['g'];
+      return { name, amount: conv.toBase(amount), unit: conv.unit };
     });
   }
 
-  // --- One-Pot fallback ---
+  // One-Pot recept za fallback
   function makeOnePotRecipe(pantry) {
-    // suma svih količina (u baznim jedinicama)
-    const total = pantry.reduce((sum, p) => sum + p.amount, 0);
-    const waterAmt = total * 2; // duplo više tečnosti
-    const saltAmt  = Math.ceil(total / 100) * 2;   // ~2g soli na 100g
-    const pepperAmt= Math.ceil(total / 200) * 1;   // ~1g bibera na 200g
+    const total = pantry.reduce((s, p) => s + p.amount, 0);
+    const waterAmt  = Math.ceil(total * 2);
+    const saltAmt   = Math.ceil(total / 100) * 2;
+    const pepperAmt = Math.ceil(total / 200) * 1;
 
     return {
       title: 'Universal One-Pot Leftovers',
       ingredients: [
-        ...pantry.map(p => ({ name: p.name, amount: p.amount, unit: p.unit })),
-        { name: 'water or stock', amount: waterAmt,    unit: 'ml'    },
-        { name: 'salt',           amount: saltAmt,     unit: 'g'     },
-        { name: 'pepper',         amount: pepperAmt,   unit: 'g'     }
+        ...pantry,
+        { name: 'water or stock', amount: waterAmt,  unit: 'ml' },
+        { name: 'salt',           amount: saltAmt,   unit: 'g'  },
+        { name: 'pepper',         amount: pepperAmt, unit: 'g'  }
       ],
       steps: [
         'Combine all your leftover ingredients in a pot.',
-        `Pour in about ${waterAmt}ml of water or stock (roughly twice the volume).`,
-        'Bring to a boil, then reduce heat and simmer 10–15 minutes.',
+        `Pour in about ${waterAmt}ml of water or stock.`,
+        'Bring to a boil, then simmer 10–15 minutes.',
         'Season with salt and pepper to taste.',
         'Stir in fresh herbs if available, then serve hot.'
       ]
     };
   }
 
-  // --- Glavni kod ---
-  let pantry = [];
-  let allRecipes = [];  // ne koristimo za MVP
-
-  // Elements
+  // UI elementi
   const nameInput   = document.getElementById('ingredient-name');
   const amountInput = document.getElementById('ingredient-amount');
-  const unitSelect  = document.getElementById('ingredient-unit');
   const addBtn      = document.getElementById('add-ingredient-btn');
   const getBtn      = document.getElementById('get-recipes-btn');
   const clearBtn    = document.getElementById('clear-btn');
   const tagsDiv     = document.getElementById('tags');
   const resultsDiv  = document.getElementById('results');
 
-  // Render tagove
+  let pantry = [];
+
   function renderTags() {
     tagsDiv.innerHTML = '';
-    pantry.forEach((item, i) => {
+    pantry.forEach(({ name, amount, unit }, i) => {
       const div = document.createElement('div');
       div.className = 'tag';
-      div.textContent = `${item.amount} ${item.unit} ${item.name}`;
+      div.textContent = `${amount} ${unit} ${name}`;
       const span = document.createElement('span');
       span.textContent = '×';
       span.addEventListener('click', () => {
@@ -78,42 +85,39 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // Dodaj sastojak
   addBtn.addEventListener('click', () => {
-    const name  = nameInput.value.trim().toLowerCase();
-    const amt   = parseFloat(amountInput.value);
-    const unit  = unitSelect.value;
+    const name = nameInput.value.trim();
+    let amt    = parseFloat(amountInput.value);
     if (!name || isNaN(amt) || amt <= 0) return;
+
+    // automatski dodeli relevantnu jedinicu i prilagodi input
+    const { unit, step, ph } = inferUnit(name);
+    amountInput.step        = step;
+    amountInput.placeholder = ph;
+
     pantry.push({ name, amount: amt, unit });
-    nameInput.value = '';
+    nameInput.value   = '';
     amountInput.value = '';
     renderTags();
   });
 
-  // Get Recipes
   getBtn.addEventListener('click', () => {
     resultsDiv.innerHTML = '';
-    if (pantry.length === 0) {
+    if (!pantry.length) {
       resultsDiv.innerHTML = '<p class="no-recipes">Add at least one ingredient.</p>';
       return;
     }
-
-    // Normalize
     const normPantry = normalizePantry(pantry);
-
-    // Fallback One-Pot
-    const recipe = makeOnePotRecipe(normPantry);
+    const recipe     = makeOnePotRecipe(normPantry);
     displayGenerated(recipe);
   });
 
-  // Clear All
   clearBtn.addEventListener('click', () => {
     pantry = [];
     renderTags();
     resultsDiv.innerHTML = '';
   });
 
-  // Prikaz generisanog recepta
   function displayGenerated(rec) {
     resultsDiv.innerHTML = '';
     const card = document.createElement('div');
@@ -123,9 +127,7 @@ document.addEventListener('DOMContentLoaded', function() {
       html += `<li>${ing.amount} ${ing.unit} ${ing.name}</li>`;
     });
     html += `</ul><p><strong>Steps:</strong></p><ol>`;
-    rec.steps.forEach(step => {
-      html += `<li>${step}</li>`;
-    });
+    rec.steps.forEach(s => html += `<li>${s}</li>`);
     html += `</ol>`;
     card.innerHTML = html;
     resultsDiv.appendChild(card);
