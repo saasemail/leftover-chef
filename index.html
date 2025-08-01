@@ -21,16 +21,16 @@
       </div>
       <div class="field">
         <label for="ingredient-amount">Amount</label>
-        <input type="number" id="ingredient-amount" min="0" step="0.1" placeholder="e.g. 0.5">
+        <input type="number" id="ingredient-amount" min="0" step="1" placeholder="e.g. 1">
       </div>
       <div class="field">
         <label for="ingredient-unit">Unit</label>
         <select id="ingredient-unit">
-          <option value="piece">piece(s)</option>
-          <option value="g">grams</option>
-          <option value="kg">kilograms</option>
-          <option value="ml">milliliters</option>
-          <option value="l">liters</option>
+          <option value="piece" data-step="1"   data-ph="e.g. 1">piece(s)</option>
+          <option value="g"     data-step="1"   data-ph="e.g. 100">grams</option>
+          <option value="kg"    data-step="0.1" data-ph="e.g. 0.5">kilograms</option>
+          <option value="ml"    data-step="10"  data-ph="e.g. 250">milliliters</option>
+          <option value="l"     data-step="0.1" data-ph="e.g. 0.3">liters</option>
         </select>
       </div>
       <button id="add-ingredient-btn" class="btn">Add Ingredient</button>
@@ -43,6 +43,26 @@
 
     <div id="results" class="results"></div>
   </div>
+
+  <!-- Inline skripta za dinamičko menjanje step/placeholder -->
+  <script>
+    const unitSelect = document.getElementById('ingredient-unit');
+    const amountInput = document.getElementById('ingredient-amount');
+
+    function updateAmountField() {
+      const opt = unitSelect.selectedOptions[0];
+      const step = opt.getAttribute('data-step');
+      const ph   = opt.getAttribute('data-ph');
+      amountInput.step = step;
+      amountInput.placeholder = ph;
+      // reset vrednost
+      amountInput.value = '';
+    }
+
+    unitSelect.addEventListener('change', updateAmountField);
+    // inicijalno pozovemo jednom
+    updateAmountField();
+  </script>
 
   <script src="app.js"></script>
 </body>
