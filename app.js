@@ -1,24 +1,45 @@
-// app.js – koristi TheMealDB za recepte
+// app.js – koristi TheMealDB za recepte + Smart Fridge + Fridge-based Suggestion
 
 window.addEventListener('DOMContentLoaded', function() {
   const suggestBtn = document.getElementById('get-recipes-btn');
   const clearBtn = document.getElementById('clear-btn');
+  const fridgeList = document.getElementById('fridge-list');
+  const clearFridgeBtn = document.getElementById('clear-fridge-btn');
+  const useFridgeBtn = document.getElementById('use-fridge-btn');
   const resultsDiv = document.getElementById('results');
 
-  suggestBtn.addEventListener('click', async function () {
-    resultsDiv.innerHTML = '';
+  const SMART_FRIDGE_KEY = 'smartFridgeItems';
 
-    const selectedEls = document.querySelectorAll('#quiz-area input[type="checkbox"]:checked');
-    const selected = Array.from(selectedEls).map(cb => cb.value.trim());
+  function loadFridge() {
+    const items = JSON.parse(localStorage.getItem(SMART_FRIDGE_KEY)) || [];
+    fridgeList.innerHTML = '';
+    items.forEach(item => {
+      const li = document.createElement('li');
+      li.textContent = item;
+      fridgeList.appendChild(li);
+    });
+  }
 
-    if (selected.length === 0) {
-      resultsDiv.innerHTML = '<p class="no-recipes">Select at least one ingredient.</p>';
-      return;
-    }
+  function saveToFridge(ingredients) {
+    let current = JSON.parse(localStorage.getItem(SMART_FRIDGE_KEY)) || [];
+    ingredients.forEach(ing => {
+      if (!current.includes(ing)) {
+        current.push(ing);
+      }
+    });
+    localStorage.setItem(SMART_FRIDGE_KEY, JSON.stringify(current));
+    loadFridge();
+  }
 
+  clearFridgeBtn.addEventListener('click', function () {
+    localStorage.removeItem(SMART_FRIDGE_KEY);
+    fridgeList.innerHTML = '';
+  });
+
+  async function fetchRecipes(ingredients) {
     const recipeMap = new Map();
 
-    for (const ingredient of selected) {
+    for (const ingredient of ingredients) {
       try {
         const res = await fetch(`https://www.themealdb.com/api/json/v1/1/filter.php?i=${ingredient}`);
         const data = await res.json();
@@ -41,16 +62,29 @@ window.addEventListener('DOMContentLoaded', function() {
       }
     }
 
-    const sortedRecipes = Array.from(recipeMap.values())
+    const sorted = Array.from(recipeMap.values())
       .sort((a, b) => b.matchCount - a.matchCount)
       .slice(0, 5);
 
-    if (sortedRecipes.length === 0) {
+    return sorted;
+  }
+
+  async function showSuggestions(ingredients) {
+    resultsDiv.innerHTML = '';
+
+    if (ingredients.length === 0) {
+      resultsDiv.innerHTML = '<p class="no-recipes">Select at least one ingredient.</p>';
+      return;
+    }
+
+    const results = await fetchRecipes(ingredients);
+
+    if (results.length === 0) {
       resultsDiv.innerHTML = '<p class="no-recipes">No recipes found for selected combination.</p>';
       return;
     }
 
-    sortedRecipes.forEach(meal => {
+    results.forEach(meal => {
       const card = document.createElement('div');
       card.className = 'recipe';
       card.innerHTML = `
@@ -60,6 +94,13 @@ window.addEventListener('DOMContentLoaded', function() {
       `;
       resultsDiv.appendChild(card);
     });
+  }
+
+  suggestBtn.addEventListener('click', function () {
+    const selectedEls = document.querySelectorAll('#quiz-area input[type="checkbox"]:checked');
+    const selected = Array.from(selectedEls).map(cb => cb.value.trim());
+    saveToFridge(selected);
+    showSuggestions(selected);
   });
 
   clearBtn.addEventListener('click', function () {
@@ -67,4 +108,11 @@ window.addEventListener('DOMContentLoaded', function() {
     checkboxes.forEach(cb => cb.checked = false);
     resultsDiv.innerHTML = '';
   });
+
+  useFridgeBtn.addEventListener('click', function () {
+    const fridgeItems = JSON.parse(localStorage.getItem(SMART_FRIDGE_KEY)) || [];
+    showSuggestions(fridgeItems);
+  });
+
+  loadFridge();
 });

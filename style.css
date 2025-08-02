@@ -140,3 +140,33 @@ body {
 #clear-btn {
   margin-top: 0.5rem;
 }
+
+/* 9. Smart Fridge Section */
+.smart-fridge {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+.smart-fridge h3 {
+  font-size: 1.4rem;
+  margin-bottom: 1rem;
+  color: var(--primary);
+}
+#fridge-list {
+  list-style: none;
+  padding-left: 0;
+  margin-bottom: 1rem;
+}
+#fridge-list li {
+  background: #f7f7f7;
+  margin-bottom: 8px;
+  padding: 8px 12px;
+  border-left: 4px solid var(--primary);
+  border-radius: 4px;
+  font-size: 0.95rem;
+}
+#clear-fridge-btn {
+  display: inline-block;
+}
