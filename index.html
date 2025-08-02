@@ -1,57 +1,57 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Instant Flavor Pairing</title>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Instant Flavor Pairing</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css?v=3">
 </head>
 <body>
-  <div class="container">
-    <header class="header">
-      <h1 class="app-title">Instant Flavor Pairing</h1>
-      <p class="tagline">Discover perfect flavor combinations from your everyday ingredients.</p>
-      <p class="description">
-        Select ingredients you have on hand and get an instant recipe suggestion tailored to those flavors.
-        No more guessing—create delicious snacks or meals in seconds and never waste leftovers again.
-      </p>
-    </header>
+  <div class="container">
+    <header class="header">
+      <h1 class="app-title">Instant Flavor Pairing</h1>
+      <p class="tagline">Discover perfect flavor combinations from your everyday ingredients.</p>
+      <p class="description">
+        Select ingredients you have on hand and get an instant recipe suggestion tailored to those flavors.
+        No more guessing—create delicious snacks or meals in seconds and never waste leftovers again.
+      </p>
+    </header>
 
-    <!-- Ingredient Selection -->
-    <div id="quiz-area" class="input-area">
-      <h3>Select ingredients:</h3>
-      <div class="checkbox-grid">
-        <label><input type="checkbox" value="egg"> Egg</label>
-        <label><input type="checkbox" value="tomato"> Tomato</label>
-        <label><input type="checkbox" value="bread"> Bread</label>
-        <label><input type="checkbox" value="cheese"> Cheese</label>
-        <label><input type="checkbox" value="ham"> Ham</label>
-        <label><input type="checkbox" value="cucumber"> Cucumber</label>
-        <label><input type="checkbox" value="milk"> Milk</label>
-        <label><input type="checkbox" value="rice"> Rice</label>
-        <label><input type="checkbox" value="beans"> Beans</label>
-        <label><input type="checkbox" value="onion"> Onion</label>
-      </div>
-      <button id="get-recipes-btn" class="btn primary">Suggest</button>
-      <button id="clear-btn" class="btn secondary">Clear Selection</button>
-    </div>
+    <!-- Ingredient Selection -->
+    <div id="quiz-area" class="input-area">
+      <h3>Select ingredients:</h3>
+      <div class="checkbox-grid">
+        <label><input type="checkbox" value="egg"> Egg</label>
+        <label><input type="checkbox" value="tomato"> Tomato</label>
+        <label><input type="checkbox" value="bread"> Bread</label>
+        <label><input type="checkbox" value="cheese"> Cheese</label>
+        <label><input type="checkbox" value="ham"> Ham</label>
+        <label><input type="checkbox" value="cucumber"> Cucumber</label>
+        <label><input type="checkbox" value="milk"> Milk</label>
+        <label><input type="checkbox" value="rice"> Rice</label>
+        <label><input type="checkbox" value="beans"> Beans</label>
+        <label><input type="checkbox" value="onion"> Onion</label>
+      </div>
+      <button id="get-recipes-btn" class="btn primary">Suggest</button>
+      <button id="clear-btn" class="btn secondary">Clear Selection</button>
+    </div>
 
-    <!-- Results from Ingredient Selection -->
-    <div id="results" class="results"></div>
+    <!-- Results from Ingredient Selection -->
+    <div id="results" class="results"></div>
 
-    <!-- SMART FRIDGE SECTION -->
-    <section class="smart-fridge">
-      <h3>Your Smart Fridge</h3>
-      <div id="fridge-list" class="fridge-checkboxes"></div>
-      <button id="clear-fridge-btn" class="btn secondary">Clear Fridge</button>
-      <button id="use-fridge-btn" class="btn primary">Use Fridge Items</button>
-    </section>
+    <!-- SMART FRIDGE SECTION -->
+    <section class="smart-fridge">
+      <h3>Your Smart Fridge</h3>
+      <div id="fridge-list" class="fridge-checkboxes"></div>
+      <button id="clear-fridge-btn" class="btn secondary">Clear Fridge</button>
+      <button id="use-fridge-btn" class="btn primary">Use Fridge Items</button>
+    </section>
 
-    <!-- Results from Fridge -->
-    <div id="fridge-results" class="results"></div>
-  </div>
+    <!-- Results from Fridge -->
+    <div id="fridge-results" class="results"></div>
+  </div>
 
-  <script src="app.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
