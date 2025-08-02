@@ -7,6 +7,7 @@ window.addEventListener('DOMContentLoaded', function() {
   const clearFridgeBtn = document.getElementById('clear-fridge-btn');
   const useFridgeBtn = document.getElementById('use-fridge-btn');
   const resultsDiv = document.getElementById('results');
+  const fridgeResultsDiv = document.getElementById('fridge-results');
 
   const SMART_FRIDGE_KEY = 'smartFridgeItems';
 
@@ -34,6 +35,7 @@ window.addEventListener('DOMContentLoaded', function() {
   clearFridgeBtn.addEventListener('click', function () {
     localStorage.removeItem(SMART_FRIDGE_KEY);
     fridgeList.innerHTML = '';
+    fridgeResultsDiv.innerHTML = '';
   });
 
   async function fetchRecipes(ingredients) {
@@ -69,18 +71,18 @@ window.addEventListener('DOMContentLoaded', function() {
     return sorted;
   }
 
-  async function showSuggestions(ingredients) {
-    resultsDiv.innerHTML = '';
+  async function showSuggestions(ingredients, targetDiv) {
+    targetDiv.innerHTML = '';
 
     if (ingredients.length === 0) {
-      resultsDiv.innerHTML = '<p class="no-recipes">Select at least one ingredient.</p>';
+      targetDiv.innerHTML = '<p class="no-recipes">Select at least one ingredient.</p>';
       return;
     }
 
     const results = await fetchRecipes(ingredients);
 
     if (results.length === 0) {
-      resultsDiv.innerHTML = '<p class="no-recipes">No recipes found for selected combination.</p>';
+      targetDiv.innerHTML = '<p class="no-recipes">No recipes found for selected combination.</p>';
       return;
     }
 
@@ -92,7 +94,7 @@ window.addEventListener('DOMContentLoaded', function() {
         <img src="${meal.img}" alt="${meal.name}" />
         <p><a href="https://www.themealdb.com/meal.php?c=${meal.id}" target="_blank" class="btn">View Recipe</a></p>
       `;
-      resultsDiv.appendChild(card);
+      targetDiv.appendChild(card);
     });
   }
 
@@ -100,7 +102,7 @@ window.addEventListener('DOMContentLoaded', function() {
     const selectedEls = document.querySelectorAll('#quiz-area input[type="checkbox"]:checked');
     const selected = Array.from(selectedEls).map(cb => cb.value.trim());
     saveToFridge(selected);
-    showSuggestions(selected);
+    showSuggestions(selected, resultsDiv);
   });
 
   clearBtn.addEventListener('click', function () {
@@ -111,7 +113,7 @@ window.addEventListener('DOMContentLoaded', function() {
 
   useFridgeBtn.addEventListener('click', function () {
     const fridgeItems = JSON.parse(localStorage.getItem(SMART_FRIDGE_KEY)) || [];
-    showSuggestions(fridgeItems);
+    showSuggestions(fridgeItems, fridgeResultsDiv);
   });
 
   loadFridge();
