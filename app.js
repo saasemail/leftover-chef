@@ -1,62 +1,52 @@
-// Instant Flavor Pairing: simple quiz logic
+// Instant Flavor Pairing: fetch real recipes from TheMealDB
 
 window.addEventListener('DOMContentLoaded', function() {
-  var pairings = [];
+  const suggestBtn = document.getElementById('get-recipes-btn');
+  const clearBtn = document.getElementById('clear-btn');
+  const resultsDiv = document.getElementById('results');
 
-  // Load static pairings.json
-  fetch('pairings.json')
-    .then(function(response) { return response.json(); })
-    .then(function(data) { pairings = data; })
-    .catch(function(error) { console.error('Error loading pairings:', error); });
-
-  // UI elements
-  var suggestBtn = document.getElementById('get-recipes-btn');
-  var clearBtn   = document.getElementById('clear-btn');
-  var resultsDiv = document.getElementById('results');
-
-  // Suggest event
-  suggestBtn.addEventListener('click', function() {
-    // Clear previous results
+  suggestBtn.addEventListener('click', function () {
     resultsDiv.innerHTML = '';
 
-    // Collect selected ingredients
-    var selectedEls = document.querySelectorAll('#quiz-area input[type="checkbox"]:checked');
-    var selected = Array.prototype.map.call(selectedEls, function(cb) { return cb.value; });
+    const selectedEls = document.querySelectorAll('#quiz-area input[type="checkbox"]:checked');
+    const selected = Array.from(selectedEls).map(cb => cb.value.trim());
 
     if (selected.length === 0) {
       resultsDiv.innerHTML = '<p class="no-recipes">Select at least one ingredient.</p>';
       return;
     }
 
-    // Filter pairings that include all selected ingredients
-    var matches = pairings.filter(function(item) {
-      return selected.every(function(ing) {
-        return item.ingredients.indexOf(ing) !== -1;
+    const query = selected.join(',');
+
+    fetch(`https://www.themealdb.com/api/json/v1/1/filter.php?i=${query}`)
+      .then(res => res.json())
+      .then(data => {
+        if (!data.meals || data.meals.length === 0) {
+          resultsDiv.innerHTML = '<p class="no-recipes">No recipes found for that combination.</p>';
+          return;
+        }
+
+        // Show top 3 results
+        data.meals.slice(0, 3).forEach(meal => {
+          const card = document.createElement('div');
+          card.className = 'recipe';
+          card.innerHTML = `
+            <h3>${meal.strMeal}</h3>
+            <img src="${meal.strMealThumb}" alt="${meal.strMeal}" />
+            <p><a href="https://www.themealdb.com/meal.php?c=${meal.idMeal}" target="_blank" class="btn">View Recipe</a></p>
+          `;
+          resultsDiv.appendChild(card);
+        });
+      })
+      .catch(error => {
+        console.error('API error:', error);
+        resultsDiv.innerHTML = '<p class="no-recipes">Error fetching recipes. Try again later.</p>';
       });
-    });
-
-    // Choose a suggestion or fallback
-    var suggestion;
-    if (matches.length > 0) {
-      suggestion = matches[Math.floor(Math.random() * matches.length)];
-    } else {
-      suggestion = {
-        title: 'Quick Snack',
-        tip: 'Combine your ingredients, drizzle with olive oil, season, and enjoy!'
-      };
-    }
-
-    // Display the suggestion
-    var card = document.createElement('div');
-    card.className = 'recipe';
-    card.innerHTML = '<h3>' + suggestion.title + '</h3><p>' + suggestion.tip + '</p>';
-    resultsDiv.appendChild(card);
   });
 
-  // Clear selection and results
-  clearBtn.addEventListener('click', function() {
-    var checkboxes = document.querySelectorAll('#quiz-area input[type="checkbox"]');
-    checkboxes.forEach(function(cb) { cb.checked = false; });
+  clearBtn.addEventListener('click', function () {
+    const checkboxes = document.querySelectorAll('#quiz-area input[type="checkbox"]');
+    checkboxes.forEach(cb => cb.checked = false);
     resultsDiv.innerHTML = '';
   });
 });
