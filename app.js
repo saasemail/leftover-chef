@@ -67,7 +67,7 @@ window.addEventListener('DOMContentLoaded', function () {
 
     const sorted = Array.from(recipeMap.values())
       .sort((a, b) => b.matchCount - a.matchCount)
-      .slice(0, 5);
+      .slice(0, 30); // Povećano sa 5 na 30
 
     return sorted;
   }
@@ -91,9 +91,9 @@ window.addEventListener('DOMContentLoaded', function () {
       const card = document.createElement('div');
       card.className = 'recipe';
       card.innerHTML = `
-        <h3>${meal.name}</h3>
-        <img src="${meal.img}" alt="${meal.name}" />
-        <p><a href="https://www.themealdb.com/meal.php?c=${meal.id}" target="_blank" class="btn">View Recipe</a></p>
+        <h4>${meal.name}</h4>
+        <img src="${meal.img}" alt="${meal.name}" style="width:100%; border-radius:6px; margin: 0.5rem 0;">
+        <a href="https://www.themealdb.com/meal.php?c=${meal.id}" target="_blank" class="btn" style="padding:8px 16px; font-size:0.85rem;">View Recipe</a>
       `;
       targetDiv.appendChild(card);
     });
