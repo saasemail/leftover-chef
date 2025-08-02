@@ -1,11 +1,11 @@
-// Instant Flavor Pairing: fetch real recipes from TheMealDB
+// app.js – koristi TheMealDB za recepte
 
 window.addEventListener('DOMContentLoaded', function() {
   const suggestBtn = document.getElementById('get-recipes-btn');
   const clearBtn = document.getElementById('clear-btn');
   const resultsDiv = document.getElementById('results');
 
-  suggestBtn.addEventListener('click', function () {
+  suggestBtn.addEventListener('click', async function () {
     resultsDiv.innerHTML = '';
 
     const selectedEls = document.querySelectorAll('#quiz-area input[type="checkbox"]:checked');
@@ -16,32 +16,50 @@ window.addEventListener('DOMContentLoaded', function() {
       return;
     }
 
-    const query = selected.join(',');
+    const recipeMap = new Map();
 
-    fetch(`https://www.themealdb.com/api/json/v1/1/filter.php?i=${query}`)
-      .then(res => res.json())
-      .then(data => {
-        if (!data.meals || data.meals.length === 0) {
-          resultsDiv.innerHTML = '<p class="no-recipes">No recipes found for that combination.</p>';
-          return;
+    for (const ingredient of selected) {
+      try {
+        const res = await fetch(`https://www.themealdb.com/api/json/v1/1/filter.php?i=${ingredient}`);
+        const data = await res.json();
+        if (data.meals) {
+          data.meals.forEach(meal => {
+            if (recipeMap.has(meal.idMeal)) {
+              recipeMap.get(meal.idMeal).matchCount++;
+            } else {
+              recipeMap.set(meal.idMeal, {
+                id: meal.idMeal,
+                name: meal.strMeal,
+                img: meal.strMealThumb,
+                matchCount: 1
+              });
+            }
+          });
         }
+      } catch (err) {
+        console.error(`Error fetching recipes for ${ingredient}:`, err);
+      }
+    }
 
-        // Show top 3 results
-        data.meals.slice(0, 3).forEach(meal => {
-          const card = document.createElement('div');
-          card.className = 'recipe';
-          card.innerHTML = `
-            <h3>${meal.strMeal}</h3>
-            <img src="${meal.strMealThumb}" alt="${meal.strMeal}" />
-            <p><a href="https://www.themealdb.com/meal.php?c=${meal.idMeal}" target="_blank" class="btn">View Recipe</a></p>
-          `;
-          resultsDiv.appendChild(card);
-        });
-      })
-      .catch(error => {
-        console.error('API error:', error);
-        resultsDiv.innerHTML = '<p class="no-recipes">Error fetching recipes. Try again later.</p>';
-      });
+    const sortedRecipes = Array.from(recipeMap.values())
+      .sort((a, b) => b.matchCount - a.matchCount)
+      .slice(0, 5);
+
+    if (sortedRecipes.length === 0) {
+      resultsDiv.innerHTML = '<p class="no-recipes">No recipes found for selected combination.</p>';
+      return;
+    }
+
+    sortedRecipes.forEach(meal => {
+      const card = document.createElement('div');
+      card.className = 'recipe';
+      card.innerHTML = `
+        <h3>${meal.name}</h3>
+        <img src="${meal.img}" alt="${meal.name}" />
+        <p><a href="https://www.themealdb.com/meal.php?c=${meal.id}" target="_blank" class="btn">View Recipe</a></p>
+      `;
+      resultsDiv.appendChild(card);
+    });
   });
 
   clearBtn.addEventListener('click', function () {
