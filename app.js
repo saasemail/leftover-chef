@@ -1,4 +1,4 @@
-// app.js – filtrira recepte na osnovu izabranih sastojaka + dozvoljenih začina
+// app.js – filtrira recepte na osnovu izabranih sastojaka + dozvoljenih začina (sa tolerancijom)
 
 window.addEventListener('DOMContentLoaded', function () {
   const suggestBtn = document.getElementById('get-recipes-btn');
@@ -12,8 +12,9 @@ window.addEventListener('DOMContentLoaded', function () {
   const SMART_FRIDGE_KEY = 'smartFridgeItems';
 
   const allowedExtras = [
-    'salt', 'pepper', 'water', 'oil', 'olive oil', 'vegetable oil',
-    'butter', 'sugar', 'flour', 'vinegar', 'spices', 'garlic', 'herbs'
+    'salt', 'pepper', 'oil', 'olive oil', 'vegetable oil', 'butter',
+    'sugar', 'flour', 'vinegar', 'water', 'garlic', 'onion', 'spices',
+    'herbs', 'lemon juice', 'soy sauce', 'milk', 'cream', 'baking powder'
   ];
 
   function normalize(str) {
@@ -96,11 +97,13 @@ window.addEventListener('DOMContentLoaded', function () {
       }
 
       const allowed = ingredients.map(normalize).concat(allowedExtras);
-      const isValid = allIngredients.every(ing => allowed.includes(ing));
+      const extraIngredients = allIngredients.filter(ing => !allowed.includes(ing));
 
-      if (isValid) {
+      if (extraIngredients.length <= 2) {
         filtered.push(meal);
       }
+
+      if (filtered.length >= 20) break; // limit prikaza
     }
 
     return filtered;
