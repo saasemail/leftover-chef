@@ -1,4 +1,4 @@
-// app.js – koristi TheMealDB za recepte + Smart Fridge + selekcija iz frižidera
+// app.js – filtrira recepte na osnovu izabranih sastojaka + dozvoljenih začina
 
 window.addEventListener('DOMContentLoaded', function () {
   const suggestBtn = document.getElementById('get-recipes-btn');
@@ -10,6 +10,15 @@ window.addEventListener('DOMContentLoaded', function () {
   const fridgeResultsDiv = document.getElementById('fridge-results');
 
   const SMART_FRIDGE_KEY = 'smartFridgeItems';
+
+  const allowedExtras = [
+    'salt', 'pepper', 'water', 'oil', 'olive oil', 'vegetable oil',
+    'butter', 'sugar', 'flour', 'vinegar', 'spices', 'garlic', 'herbs'
+  ];
+
+  function normalize(str) {
+    return str.trim().toLowerCase();
+  }
 
   function loadFridge() {
     const items = JSON.parse(localStorage.getItem(SMART_FRIDGE_KEY)) || [];
@@ -39,6 +48,12 @@ window.addEventListener('DOMContentLoaded', function () {
     fridgeResultsDiv.innerHTML = '';
   });
 
+  async function getMealDetails(id) {
+    const res = await fetch(`https://www.themealdb.com/api/json/v1/1/lookup.php?i=${id}`);
+    const data = await res.json();
+    return data.meals ? data.meals[0] : null;
+  }
+
   async function fetchRecipes(ingredients) {
     const recipeMap = new Map();
 
@@ -48,15 +63,15 @@ window.addEventListener('DOMContentLoaded', function () {
         const data = await res.json();
         if (data.meals) {
           data.meals.forEach(meal => {
-            if (recipeMap.has(meal.idMeal)) {
-              recipeMap.get(meal.idMeal).matchCount++;
-            } else {
+            if (!recipeMap.has(meal.idMeal)) {
               recipeMap.set(meal.idMeal, {
                 id: meal.idMeal,
                 name: meal.strMeal,
                 img: meal.strMealThumb,
                 matchCount: 1
               });
+            } else {
+              recipeMap.get(meal.idMeal).matchCount++;
             }
           });
         }
@@ -65,11 +80,30 @@ window.addEventListener('DOMContentLoaded', function () {
       }
     }
 
-    const sorted = Array.from(recipeMap.values())
-      .sort((a, b) => b.matchCount - a.matchCount)
-      .slice(0, 30); // Povećano sa 5 na 30
+    const all = Array.from(recipeMap.values()).sort((a, b) => b.matchCount - a.matchCount);
+    const filtered = [];
 
-    return sorted;
+    for (const meal of all) {
+      const fullMeal = await getMealDetails(meal.id);
+      if (!fullMeal) continue;
+
+      const allIngredients = [];
+      for (let i = 1; i <= 20; i++) {
+        const ing = fullMeal[`strIngredient${i}`];
+        if (ing && ing.trim()) {
+          allIngredients.push(normalize(ing));
+        }
+      }
+
+      const allowed = ingredients.map(normalize).concat(allowedExtras);
+      const isValid = allIngredients.every(ing => allowed.includes(ing));
+
+      if (isValid) {
+        filtered.push(meal);
+      }
+    }
+
+    return filtered;
   }
 
   async function showSuggestions(ingredients, targetDiv) {
@@ -91,9 +125,9 @@ window.addEventListener('DOMContentLoaded', function () {
       const card = document.createElement('div');
       card.className = 'recipe';
       card.innerHTML = `
-        <h4>${meal.name}</h4>
-        <img src="${meal.img}" alt="${meal.name}" style="width:100%; border-radius:6px; margin: 0.5rem 0;">
-        <a href="https://www.themealdb.com/meal.php?c=${meal.id}" target="_blank" class="btn" style="padding:8px 16px; font-size:0.85rem;">View Recipe</a>
+        <h3>${meal.name}</h3>
+        <img src="${meal.img}" alt="${meal.name}" />
+        <p><a href="https://www.themealdb.com/meal.php?c=${meal.id}" target="_blank" class="btn">View Recipe</a></p>
       `;
       targetDiv.appendChild(card);
     });
