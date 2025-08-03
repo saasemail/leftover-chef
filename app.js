@@ -1,4 +1,4 @@
-// app.js – koristi samo TheMealDB sa brzim prikazom i dodatnim sastojcima kasnije (tolerance +2)
+// app.js – koristi samo TheMealDB sa brzim prikazom, random redosledom i tolerance +2
 
 window.addEventListener('DOMContentLoaded', function () {
   const suggestBtn = document.getElementById('get-recipes-btn');
@@ -19,6 +19,14 @@ window.addEventListener('DOMContentLoaded', function () {
 
   function normalize(str) {
     return str.trim().toLowerCase();
+  }
+
+  function shuffleArray(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
   }
 
   function loadFridge() {
@@ -94,7 +102,6 @@ window.addEventListener('DOMContentLoaded', function () {
 
     const normalizedInput = ingredients.map(normalize);
     const quickList = await fetchRecipesQuick(normalizedInput);
-
     if (quickList.length === 0) {
       targetDiv.innerHTML = '<p class="no-recipes">No recipes found for selected combination.</p>';
       return;
@@ -103,41 +110,36 @@ window.addEventListener('DOMContentLoaded', function () {
     targetDiv.innerHTML = '<p class="no-recipes">Most relevant recipes:</p>';
 
     const allowed = normalizedInput.concat(allowedExtras);
-    const primary = [];
-    const fallback = [];
+    const allDetails = await Promise.all(
+      quickList.map(async (meal) => {
+        const full = await getMealDetails(meal.id);
+        if (!full) return null;
 
-    for (const meal of quickList) {
-      const full = await getMealDetails(meal.id);
-      if (!full) continue;
-
-      const allIngredients = [];
-      for (let i = 1; i <= 20; i++) {
-        const ing = full[`strIngredient${i}`];
-        if (ing && ing.trim()) {
-          allIngredients.push(normalize(ing));
+        const allIngredients = [];
+        for (let i = 1; i <= 20; i++) {
+          const ing = full[`strIngredient${i}`];
+          if (ing && ing.trim()) {
+            allIngredients.push(normalize(ing));
+          }
         }
-      }
 
-      const extraIngredients = allIngredients.filter(i => !allowed.includes(i));
-      const extraInfo = extraIngredients.length > 0 ? `Includes: + ${extraIngredients.join(', ')}` : '';
+        const extraIngredients = allIngredients.filter(i => !allowed.includes(i));
+        return {
+          id: meal.id,
+          name: meal.name,
+          img: meal.img,
+          link: `https://www.themealdb.com/meal.php?c=${meal.id}`,
+          extraInfo: extraIngredients.length > 0 ? `Includes: + ${extraIngredients.join(', ')}` : '',
+          extraCount: extraIngredients.length
+        };
+      })
+    );
 
-      const entry = {
-        id: meal.id,
-        name: meal.name,
-        img: meal.img,
-        link: `https://www.themealdb.com/meal.php?c=${meal.id}`,
-        extraInfo,
-        extraCount: extraIngredients.length
-      };
+    const filtered = allDetails.filter(Boolean);
+    const primary = filtered.filter(m => m.extraCount <= 2);
+    const fallback = filtered.filter(m => m.extraCount > 2);
 
-      if (extraIngredients.length <= 2) {
-        primary.push(entry);
-      } else {
-        fallback.push(entry);
-      }
-    }
-
-    const finalList = primary.length > 0 ? primary : fallback;
+    const finalList = primary.length > 0 ? shuffleArray(primary) : shuffleArray(fallback);
 
     finalList.forEach(meal => {
       const card = document.createElement('div');
