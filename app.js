@@ -1,4 +1,4 @@
-// app.js – koristi lokalne recepte iz pairings.json + API ako treba
+// app.js – koristi lokalne recepte iz pairings.json + API ako treba, sa slikama i linkovima
 
 window.addEventListener('DOMContentLoaded', function () {
   const suggestBtn = document.getElementById('get-recipes-btn');
@@ -62,9 +62,9 @@ window.addEventListener('DOMContentLoaded', function () {
     });
 
   function findLocalPairings(ingredients) {
-    const normalized = ingredients.map(i => i.toLowerCase());
+    const normalized = ingredients.map(i => normalize(i));
     return localRecipes.filter(recipe => {
-      return recipe.ingredients.every(i => normalized.includes(i));
+      return recipe.ingredients.every(i => normalized.includes(normalize(i)));
     });
   }
 
@@ -148,7 +148,9 @@ window.addEventListener('DOMContentLoaded', function () {
         card.className = 'recipe';
         card.innerHTML = `
           <h3>${rec.title}</h3>
+          ${rec.img ? `<img src="${rec.img}" alt="${rec.title}" />` : ''}
           <p>${rec.tip}</p>
+          ${rec.link ? `<p><a href="${rec.link}" target="_blank" class="btn">View Recipe</a></p>` : ''}
         `;
         targetDiv.appendChild(card);
       });

@@ -1,52 +1,105 @@
 [
   {
-    "ingredients": ["egg", "tomato"],
+    "ingredients": [
+      "egg",
+      "tomato"
+    ],
     "title": "Classic Bruschetta",
-    "tip": "Toast slices of bread, rub with garlic, top with diced tomato, basil, olive oil, and a pinch of salt."
+    "tip": "Toast slices of bread, rub with garlic, top with diced tomato, basil, olive oil, and a pinch of salt.",
+    "image": "https://www.themealdb.com/images/media/meals/utxqpt1511639216.jpg",
+    "link": "https://www.themealdb.com/meal.php?c=52771"
   },
   {
-    "ingredients": ["bread", "cheese"],
+    "ingredients": [
+      "bread",
+      "cheese"
+    ],
     "title": "Cheesy Toast",
-    "tip": "Butter bread, place cheese on top, broil until melted and golden; serve hot."
+    "tip": "Butter bread, place cheese on top, broil until melted and golden; serve hot.",
+    "image": "https://www.themealdb.com/images/media/meals/xvsurr1511719182.jpg",
+    "link": "https://www.themealdb.com/meal.php?c=52813"
   },
   {
-    "ingredients": ["cucumber", "yogurt"],
+    "ingredients": [
+      "cucumber",
+      "yogurt"
+    ],
     "title": "Quick Tzatziki",
-    "tip": "Grate cucumber, mix with yogurt, garlic, lemon juice, dill, and salt; chill before serving."
+    "tip": "Grate cucumber, mix with yogurt, garlic, lemon juice, dill, and salt; chill before serving.",
+    "image": "https://www.themealdb.com/images/media/meals/sywswr1511383814.jpg",
+    "link": "https://www.themealdb.com/meal.php?c=52804"
   },
   {
-    "ingredients": ["rice", "beans"],
+    "ingredients": [
+      "rice",
+      "beans"
+    ],
     "title": "Rice and Bean Bowl",
-    "tip": "Combine cooked rice and beans, season with cumin, lime juice, salt, and pepper; top with chopped cilantro."
+    "tip": "Combine cooked rice and beans, season with cumin, lime juice, salt, and pepper; top with chopped cilantro.",
+    "image": "https://www.themealdb.com/images/media/meals/uszr7t1587670726.jpg",
+    "link": "https://www.themealdb.com/meal.php?c=52785"
   },
   {
-    "ingredients": ["ham", "egg", "cheese"],
+    "ingredients": [
+      "ham",
+      "egg",
+      "cheese"
+    ],
     "title": "Ham & Egg Breakfast Sandwich",
-    "tip": "Fry an egg, layer on bread or English muffin with ham and cheese; toast until cheese melts."
+    "tip": "Fry an egg, layer on bread or English muffin with ham and cheese; toast until cheese melts.",
+    "image": "https://www.themealdb.com/images/media/meals/ysxwuq1487323065.jpg",
+    "link": "https://www.themealdb.com/meal.php?c=52822"
   },
   {
-    "ingredients": ["tomato", "onion", "cucumber"],
+    "ingredients": [
+      "tomato",
+      "onion",
+      "cucumber"
+    ],
     "title": "Fresh Salad",
-    "tip": "Chop tomato, onion, and cucumber; toss with olive oil, vinegar, salt, and pepper."
+    "tip": "Chop tomato, onion, and cucumber; toss with olive oil, vinegar, salt, and pepper.",
+    "image": "https://www.themealdb.com/images/media/meals/1548772327.jpg",
+    "link": "https://www.themealdb.com/meal.php?c=52901"
   },
   {
-    "ingredients": ["bread", "egg"],
+    "ingredients": [
+      "bread",
+      "egg"
+    ],
     "title": "French Toast",
-    "tip": "Whisk egg with a splash of milk, dip bread slices, and fry until golden; dust with cinnamon sugar."
+    "tip": "Whisk egg with a splash of milk, dip bread slices, and fry until golden; dust with cinnamon sugar.",
+    "image": "https://www.themealdb.com/images/media/meals/1550440197.jpg",
+    "link": "https://www.themealdb.com/meal.php?c=52855"
   },
   {
-    "ingredients": ["chicken", "broth"],
+    "ingredients": [
+      "chicken",
+      "broth"
+    ],
     "title": "Simple Chicken Soup",
-    "tip": "Simmer chicken in broth with chopped onion and carrot; season with salt, pepper, and parsley."
+    "tip": "Simmer chicken in broth with chopped onion and carrot; season with salt, pepper, and parsley.",
+    "image": "https://www.themealdb.com/images/media/meals/xxpqsy1511452222.jpg",
+    "link": "https://www.themealdb.com/meal.php?c=52818"
   },
   {
-    "ingredients": ["rice", "egg"],
+    "ingredients": [
+      "rice",
+      "egg"
+    ],
     "title": "Egg Fried Rice",
-    "tip": "Scramble egg, add cooked rice and soy sauce; stir-fry with chopped scallions."
+    "tip": "Scramble egg, add cooked rice and soy sauce; stir-fry with chopped scallions.",
+    "image": "https://www.themealdb.com/images/media/meals/1529446137.jpg",
+    "link": "https://www.themealdb.com/meal.php?c=52823"
   },
   {
-    "ingredients": ["tomato", "bread", "cheese"],
+    "ingredients": [
+      "tomato",
+      "bread",
+      "cheese"
+    ],
     "title": "Tomato Cheese Bruschetta",
-    "tip": "Top toasted bread with sliced tomato and melted cheese; finish with basil and olive oil."
+    "tip": "Top toasted bread with sliced tomato and melted cheese; finish with basil and olive oil.",
+    "image": "https://www.themealdb.com/images/media/meals/1548772327.jpg",
+    "link": "https://www.themealdb.com/meal.php?c=52819"
   }
 ]
