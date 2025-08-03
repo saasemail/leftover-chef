@@ -8,7 +8,10 @@ window.addEventListener('DOMContentLoaded', function () {
   const allowedExtras = [
     'salt', 'pepper', 'oil', 'olive oil', 'vegetable oil', 'butter',
     'sugar', 'flour', 'vinegar', 'water', 'garlic', 'onion', 'spices',
-    'herbs', 'lemon juice', 'soy sauce', 'milk', 'cream', 'baking powder'
+    'herbs', 'lemon juice', 'soy sauce', 'milk', 'cream', 'baking powder',
+    'egg', 'cheese', 'bread', 'rice', 'pasta', 'chicken', 'beef', 'pork',
+    'tomato', 'cucumber', 'beans', 'ham', 'lettuce', 'carrot', 'potato',
+    'basil', 'oregano', 'thyme', 'bay leaf', 'paprika'
   ];
 
   function normalize(str) {
