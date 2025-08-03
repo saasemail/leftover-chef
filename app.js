@@ -104,7 +104,6 @@ window.addEventListener('DOMContentLoaded', function () {
         filtered.push(meal);
       }
 
-      if (filtered.length >= 20) break;
     }
 
     return filtered;
