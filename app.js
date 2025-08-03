@@ -1,4 +1,4 @@
-// app.js – filtrira recepte na osnovu izabranih sastojaka + dozvoljenih začina (sa tolerancijom)
+// app.js – koristi lokalne recepte iz pairings.json + API ako treba
 
 window.addEventListener('DOMContentLoaded', function () {
   const suggestBtn = document.getElementById('get-recipes-btn');
@@ -49,13 +49,33 @@ window.addEventListener('DOMContentLoaded', function () {
     fridgeResultsDiv.innerHTML = '';
   });
 
+  // === LOCAL PAIRINGS ===
+  let localRecipes = [];
+
+  fetch('pairings.json')
+    .then(res => res.json())
+    .then(data => {
+      localRecipes = data;
+    })
+    .catch(err => {
+      console.error('Failed to load local pairings:', err);
+    });
+
+  function findLocalPairings(ingredients) {
+    const normalized = ingredients.map(i => i.toLowerCase());
+    return localRecipes.filter(recipe => {
+      return recipe.ingredients.every(i => normalized.includes(i));
+    });
+  }
+
+  // === API RECIPE FETCHING ===
   async function getMealDetails(id) {
     const res = await fetch(`https://www.themealdb.com/api/json/v1/1/lookup.php?i=${id}`);
     const data = await res.json();
     return data.meals ? data.meals[0] : null;
   }
 
-  async function fetchRecipes(ingredients) {
+  async function fetchRecipes(ingredients, tolerance = 2) {
     const recipeMap = new Map();
 
     for (const ingredient of ingredients) {
@@ -99,11 +119,12 @@ window.addEventListener('DOMContentLoaded', function () {
       const allowed = ingredients.map(normalize).concat(allowedExtras);
       const extraIngredients = allIngredients.filter(ing => !allowed.includes(ing));
 
-      if (extraIngredients.length <= 2) {
+      if (extraIngredients.length <= tolerance) {
+        meal.extraInfo = extraIngredients.length > 0 ? `+ ${extraIngredients.join(', ')}` : '';
         filtered.push(meal);
       }
 
-      if (filtered.length >= 20) break; // limit prikaza
+      if (filtered.length >= 20) break;
     }
 
     return filtered;
@@ -117,11 +138,34 @@ window.addEventListener('DOMContentLoaded', function () {
       return;
     }
 
-    const results = await fetchRecipes(ingredients);
+    // prvo probaj lokalno
+    const localMatches = findLocalPairings(ingredients);
+
+    if (localMatches.length > 0) {
+      targetDiv.innerHTML = '<p class="no-recipes">Suggested quick pairings:</p>';
+      localMatches.forEach(rec => {
+        const card = document.createElement('div');
+        card.className = 'recipe';
+        card.innerHTML = `
+          <h3>${rec.title}</h3>
+          <p>${rec.tip}</p>
+        `;
+        targetDiv.appendChild(card);
+      });
+      return;
+    }
+
+    // ako nema lokalno, koristi API
+    let results = await fetchRecipes(ingredients, 2);
 
     if (results.length === 0) {
-      targetDiv.innerHTML = '<p class="no-recipes">No recipes found for selected combination.</p>';
-      return;
+      results = await fetchRecipes(ingredients, 4);
+      if (results.length > 0) {
+        targetDiv.innerHTML = '<p class="no-recipes">Showing best available matches with extra ingredients:</p>';
+      } else {
+        targetDiv.innerHTML = '<p class="no-recipes">No recipes found for selected combination.</p>';
+        return;
+      }
     }
 
     results.forEach(meal => {
@@ -130,6 +174,7 @@ window.addEventListener('DOMContentLoaded', function () {
       card.innerHTML = `
         <h3>${meal.name}</h3>
         <img src="${meal.img}" alt="${meal.name}" />
+        ${meal.extraInfo ? `<p class="extra-info">Includes: ${meal.extraInfo}</p>` : ''}
         <p><a href="https://www.themealdb.com/meal.php?c=${meal.id}" target="_blank" class="btn">View Recipe</a></p>
       `;
       targetDiv.appendChild(card);
