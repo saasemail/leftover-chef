@@ -1,4 +1,4 @@
-// app.js – koristi samo TheMealDB sa preciznim uparivanjem i prikazom dodatnih sastojaka
+// app.js – koristi samo TheMealDB sa brzim prikazom i dodatnim sastojcima kasnije
 
 window.addEventListener('DOMContentLoaded', function () {
   const suggestBtn = document.getElementById('get-recipes-btn');
@@ -55,7 +55,7 @@ window.addEventListener('DOMContentLoaded', function () {
     return data.meals ? data.meals[0] : null;
   }
 
-  async function fetchRecipes(ingredients, tolerance = 2) {
+  async function fetchRecipesQuick(ingredients) {
     const recipeMap = new Map();
 
     for (const ingredient of ingredients) {
@@ -81,32 +81,7 @@ window.addEventListener('DOMContentLoaded', function () {
       }
     }
 
-    const sorted = Array.from(recipeMap.values()).sort((a, b) => b.matchCount - a.matchCount);
-    const filtered = [];
-
-    for (const meal of sorted) {
-      const fullMeal = await getMealDetails(meal.id);
-      if (!fullMeal) continue;
-
-      const allIngredients = [];
-      for (let i = 1; i <= 20; i++) {
-        const ing = fullMeal[`strIngredient${i}`];
-        if (ing && ing.trim()) {
-          allIngredients.push(normalize(ing));
-        }
-      }
-
-      const allowed = ingredients.map(normalize).concat(allowedExtras);
-      const extraIngredients = allIngredients.filter(ing => !allowed.includes(ing));
-
-      if (extraIngredients.length <= tolerance) {
-        meal.extraInfo = extraIngredients.length > 0 ? `+ ${extraIngredients.join(', ')}` : '';
-        filtered.push(meal);
-      }
-
-    }
-
-    return filtered;
+    return Array.from(recipeMap.values()).sort((a, b) => b.matchCount - a.matchCount);
   }
 
   async function showSuggestions(ingredients, targetDiv) {
@@ -117,24 +92,53 @@ window.addEventListener('DOMContentLoaded', function () {
       return;
     }
 
-    const results = await fetchRecipes(ingredients, 2);
+    const normalizedInput = ingredients.map(normalize);
+    const quickList = await fetchRecipesQuick(normalizedInput);
 
-    if (results.length === 0) {
+    if (quickList.length === 0) {
       targetDiv.innerHTML = '<p class="no-recipes">No recipes found for selected combination.</p>';
       return;
     }
 
-    results.forEach(meal => {
+    targetDiv.innerHTML = '<p class="no-recipes">Most relevant recipes:</p>';
+
+    quickList.forEach(meal => {
       const card = document.createElement('div');
       card.className = 'recipe';
+      card.id = `meal-${meal.id}`;
       card.innerHTML = `
         <h3>${meal.name}</h3>
         <img src="${meal.img}" alt="${meal.name}" />
-        ${meal.extraInfo ? `<p class="extra-info">Includes: ${meal.extraInfo}</p>` : ''}
         <p><a href="https://www.themealdb.com/meal.php?c=${meal.id}" target="_blank" class="btn">View Recipe</a></p>
       `;
       targetDiv.appendChild(card);
     });
+
+    // dodatno prikupi detalje za sastojke (asinkrono)
+    for (const meal of quickList) {
+      const full = await getMealDetails(meal.id);
+      if (!full) continue;
+
+      const allIngredients = [];
+      for (let i = 1; i <= 20; i++) {
+        const ing = full[`strIngredient${i}`];
+        if (ing && ing.trim()) {
+          allIngredients.push(normalize(ing));
+        }
+      }
+
+      const allowed = normalizedInput.concat(allowedExtras);
+      const extraIngredients = allIngredients.filter(i => !allowed.includes(i));
+      const extraInfo = extraIngredients.length > 0 ? `Includes: + ${extraIngredients.join(', ')}` : '';
+
+      const card = document.getElementById(`meal-${meal.id}`);
+      if (card && extraInfo) {
+        const p = document.createElement('p');
+        p.className = 'extra-info';
+        p.textContent = extraInfo;
+        card.appendChild(p);
+      }
+    }
   }
 
   suggestBtn.addEventListener('click', function () {
