@@ -90,14 +90,15 @@ window.addEventListener('DOMContentLoaded', function () {
           }
         }
 
-        const extraIngredients = allIngredients.filter(i => !allowed.includes(i));
+        const cleanExtras = allIngredients.filter(i => !allowed.includes(i));
+
         return {
           id: meal.id,
           name: meal.name,
           img: meal.img,
           link: `https://www.themealdb.com/meal.php?c=${meal.id}`,
-          extraInfo: extraIngredients.length > 0 ? `Includes: + ${extraIngredients.join(', ')}` : '',
-          extraCount: extraIngredients.length
+          extraInfo: cleanExtras.length > 0 ? `Includes: + ${cleanExtras.join(', ')}` : '',
+          extraCount: cleanExtras.length
         };
       })
     );
