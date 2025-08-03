@@ -9,7 +9,7 @@ window.addEventListener('DOMContentLoaded', function () {
     'salt', 'pepper', 'oil', 'olive oil', 'vegetable oil', 'butter',
     'sugar', 'flour', 'vinegar', 'water', 'garlic', 'onion', 'spices',
     'herbs', 'lemon juice', 'soy sauce', 'milk', 'cream', 'baking powder',
-    'egg', 'cheese', 'bread', 'rice', 'pasta', 'chicken', 'beef', 'pork',
+    'egg', 'cheese', 'bread', 'rice', 'pasta', 'chicken', 'beef',
     'tomato', 'cucumber', 'beans', 'ham', 'lettuce', 'carrot', 'potato',
     'basil', 'oregano', 'thyme', 'bay leaf', 'paprika'
   ];
